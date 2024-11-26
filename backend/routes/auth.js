@@ -4,6 +4,8 @@ const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+var fetchuser=require("../middleware/fetchuser")
+
 const JWT_SECRET="appleisgood$"
 
 // ROUTE1: Create a new user using POST using '/api/auth/createuser'
@@ -16,11 +18,6 @@ router.post(
   ],
   async (req, res) => {
     const errors = validationResult(req);
-
-    // If validation fails, send errors
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
 
     try {
       // Check whether user with the same email exists
@@ -94,13 +91,11 @@ router.post(
   })
 
 
-  //ROUTE3: GEt Login user details using '/api/auth/getlogin' . No login require
+  //ROUTE3: GEt Login user details using '/api/auth/getuser' . No login require
 
 router.post(
-  '/getlogin',
-  [
-
-  ],
+  '/getuser',
+  fetchuser,
   async (req, res) => {
     const errors = validationResult(req);
 
@@ -111,9 +106,9 @@ router.post(
 
     try{
 
-      var userId="todo";
+      var userId=req.user.id;
       const user = await User.findById(userId).select("-password");
-
+      res.send(user);
     }catch (err) {
       console.error(err.message);
       res.status(500).send('Internal Server Error');
