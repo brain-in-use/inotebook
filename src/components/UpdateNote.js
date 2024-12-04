@@ -30,8 +30,21 @@ export default function UpdateNote({ note }) { // Destructure `note` prop here
   };
 
   const handleSave = () => {
-    updateNote(editedNote.id, editedNote.title, editedNote.description, editedNote.tag);
+    updateNote(note._id, editedNote.title, editedNote.description, editedNote.tag);
   };
+  // const handleClose = () => {
+  //   // Hide modal programmatically using Bootstrap's modal API
+  //   const modalElement = document.getElementById("exampleModal");
+  //   if (modalElement) {
+  //   // Get the modal instance
+  //   const modalInstance = window.bootstrap.Modal.getInstance(modalElement);
+    
+  //   if (modalInstance) {
+  //     modalInstance.hide(); // Hide the modal
+  //     modalInstance.dispose(); // Dispose of the instance
+  //   }
+  // }
+  // };
 
   return (
     <div
@@ -96,13 +109,7 @@ export default function UpdateNote({ note }) { // Destructure `note` prop here
             </div>
           </div>
           <div className="modal-footer">
-            <button
-              type="button"
-              className="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              Close
-            </button>
+          <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             <button
               type="button"
               className="btn btn-primary"
