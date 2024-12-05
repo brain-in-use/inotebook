@@ -30,7 +30,7 @@ function Login() {
     console.log('Login submitted:', { email, password },json);
     if(json.success){
         localStorage.setItem('token',json.authtoken);
-        history.push('/');
+        navigate('/');
     }
     else{
         alert("Invalid Credentials")
