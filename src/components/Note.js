@@ -2,19 +2,25 @@ import React, { useContext, useState, useEffect } from "react";
 import NoteContext from "../context/notes/NoteContext";
 import NoteItem from "./NoteItem";
 import UpdateNote from "./UpdateNote";
+import { useNavigate } from "react-router-dom";
 
 export default function Note() {
   const context = useContext(NoteContext);
   const { notes, getNote } = context;
-
+  const navigate=useNavigate();
   // State for the note being edited
   const [currentNote, setCurrentNote] = useState(null);
 
   useEffect(() => {
     const fetchNotes = async () => {
+      
       await getNote(); // Fetch notes from the server
+    
     };
+    if(localStorage.getItem('token'))
     fetchNotes();
+    else
+    navigate('/login');
     // eslint-disable-next-line
   }, []); // Ensure this runs only once
 
@@ -35,7 +41,7 @@ export default function Note() {
 
   return (
     <>
-      <div className="row my-3">
+     {localStorage.getItem('token')&& <div className="row my-3">
         <h2>Your Notes</h2>
         {notes.length === 0 ? (
           <p>No notes to display!</p>
@@ -49,7 +55,7 @@ export default function Note() {
           ))
         )}
       </div>
-
+}
       {/* Update Note Modal */}
       {currentNote && <UpdateNote note={currentNote} />}
     </>

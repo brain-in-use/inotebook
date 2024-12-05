@@ -4,11 +4,12 @@ const { body, validationResult } = require('express-validator');
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-var fetchuser=require("../middleware/fetchuser")
+const fetchuser = require('../middleware/fetchuser');
 
-const JWT_SECRET="appleisgood$"
+const JWT_SECRET = "appleisgood$";
+let success = false;
 
-// ROUTE1: Create a new user using POST using '/api/auth/createuser'
+// ROUTE 1: Create a new user using POST '/api/auth/createuser'
 router.post(
   '/createuser',
   [
@@ -19,16 +20,20 @@ router.post(
   async (req, res) => {
     const errors = validationResult(req);
 
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, errors: errors.array() });
+    }
+
     try {
-      // Check whether user with the same email exists
+      // Check if a user with the same email exists
       let user = await User.findOne({ email: req.body.email });
       if (user) {
-        return res.status(400).json({ error: 'Sorry, a user with the same email already exists.' });
+        return res.status(400).json({ success: false, error: 'A user with the same email already exists.' });
       }
 
-      //To hash and and add salt to the password
-      var salt = await bcrypt.genSaltSync(10);
-      var hash = await bcrypt.hashSync(req.body.password, salt);
+      // Hash the password
+      const salt = await bcrypt.genSalt(10);
+      const hash = await bcrypt.hash(req.body.password, salt);
 
       // Create a new user
       user = await User.create({
@@ -36,13 +41,15 @@ router.post(
         email: req.body.email,
         password: hash,
       });
-      const data={
-        user :{
-          id: user.id
-        }
-      }
-      const authToken =  jwt.sign(data,JWT_SECRET);
-      res.json({authToken});
+
+      const data = {
+        user: {
+          id: user.id,
+        },
+      };
+
+      const authToken = jwt.sign(data, JWT_SECRET);
+      res.json({ success: true, authToken });
     } catch (err) {
       console.error(err.message);
       res.status(500).send('Internal Server Error');
@@ -50,8 +57,7 @@ router.post(
   }
 );
 
-//ROUTE2: Authinticate user using '/api/auth/login' . No login require
-
+// ROUTE 2: Authenticate user using POST '/api/auth/login'
 router.post(
   '/login',
   [
@@ -61,61 +67,52 @@ router.post(
   async (req, res) => {
     const errors = validationResult(req);
 
-    // If validation fails, send errors
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ success: false, errors: errors.array() });
     }
-    const {email,password}=req.body;
-    try{
-      let user= await User.findOne({email});
-        if(!user){
-          return res.status(400).json({error:"Please try to ligin with correct credentials"});
-        }
-      
-        const passwordCompare = await bcrypt.compare(password,user.password);
-        if(!passwordCompare){
-          return res.status(400).json({error:"Please try to ligin with correct credentials"});
-        }
-        const data={
-          user :{
-            id: user.id
-          }
-        }
-        const authToken =  jwt.sign(data,JWT_SECRET);
-        res.json({authToken});
 
-    }catch (err) {
+    const { email, password } = req.body;
+
+    try {
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(400).json({ success: false, error: 'Invalid credentials. Please try again.' });
+      }
+
+      const passwordCompare = await bcrypt.compare(password, user.password);
+      if (!passwordCompare) {
+        return res.status(400).json({ success: false, error: 'Invalid credentials. Please try again.' });
+      }
+
+      const data = {
+        user: {
+          id: user.id,
+        },
+      };
+
+      const authToken = jwt.sign(data, JWT_SECRET);
+      res.json({ success: true, authToken });
+    } catch (err) {
       console.error(err.message);
       res.status(500).send('Internal Server Error');
     }
-  })
+  }
+);
 
-
-  //ROUTE3: GEt Login user details using '/api/auth/getuser' . No login require
-
+// ROUTE 3: Get logged-in user details using POST '/api/auth/getuser'
 router.post(
   '/getuser',
   fetchuser,
   async (req, res) => {
-    const errors = validationResult(req);
-
-    // If validation fails, send errors
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    try{
-
-      var userId=req.user.id;
-      const user = await User.findById(userId).select("-password");
-      res.send(user);
-    }catch (err) {
+    try {
+      const userId = req.user.id;
+      const user = await User.findById(userId).select('-password');
+      res.json({ success: true, user });
+    } catch (err) {
       console.error(err.message);
       res.status(500).send('Internal Server Error');
     }
-
-
   }
-)
+);
 
 module.exports = router;

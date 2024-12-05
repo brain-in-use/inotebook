@@ -115,6 +115,7 @@ export default function UpdateNote({ note }) { // Destructure `note` prop here
               className="btn btn-primary"
               onClick={handleSave}
               data-bs-dismiss="modal"
+              disabled={editedNote.title.length<5 || editedNote.description.length<5}
             >
               Save changes
             </button>
