@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState,useContext } from 'react';
 import { useNavigate} from 'react-router-dom';
+import NoteContext from '../context/notes/NoteContext';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate=useNavigate();
+  const {showAlert}=useContext(NoteContext);
   const handleSubmit = async(e) => {
     e.preventDefault();
 
@@ -29,8 +31,9 @@ function Login() {
     // Handle login logic here (e.g., call an API)
     console.log('Login submitted:', { email, password },json);
     if(json.success){
-        localStorage.setItem('token',json.authtoken);
+        localStorage.setItem('token',json.authToken);
         navigate('/');
+        showAlert('Logged In','success');
     }
     else{
         alert("Invalid Credentials")

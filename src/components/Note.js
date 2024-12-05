@@ -17,10 +17,12 @@ export default function Note() {
       await getNote(); // Fetch notes from the server
     
     };
-    if(localStorage.getItem('token'))
-    fetchNotes();
-    else
-    navigate('/login');
+    if(localStorage.getItem('token')){
+      fetchNotes();
+    }
+    else{
+      navigate('/login');
+    }
     // eslint-disable-next-line
   }, []); // Ensure this runs only once
 

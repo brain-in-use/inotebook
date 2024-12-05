@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState,useContext } from 'react';
 import { useNavigate} from 'react-router-dom';
+import NoteContext from '../context/notes/NoteContext';
 function SignUp() {
   const [credentials, setCredentials] = useState({
     name: '',
@@ -7,7 +8,7 @@ function SignUp() {
     password: '',
     confirmPassword: '',
   });
-
+  const {showAlert}=useContext(NoteContext);
   const [message, setMessage] = useState('');
   const navigate=useNavigate();
   // Handle input changes
@@ -47,7 +48,32 @@ function SignUp() {
           password: '',
           confirmPassword: '',
         });
-        navigate('/')
+        showAlert('New Account Created','success');
+        
+
+        const response = await fetch("http://localhost:5000/api/auth/login", {
+            method: "POST",
+            headers: {
+              // Use headers (plural) instead of header
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email, password}),
+          });
+        
+          const json = await response.json();
+        
+            
+            // Handle login logic here (e.g., call an API)
+            console.log('Login submitted:', { email, password },json);
+            if(json.success){
+                localStorage.setItem('token',json.authToken);
+                navigate('/');
+                showAlert('Logged In','success');
+            }
+
+
+        // navigate('/')
+        
       } else {
         setMessage(result.error || 'Something went wrong!');
       }
@@ -84,7 +110,7 @@ function SignUp() {
             value={credentials.email}
             onChange={handleChange}
             required 
-            style={{ width: '100%', padding: '8px', marginTop: '5px', boxSizing: 'border-box' }} style={{ width: '100%', padding: '8px', marginTop: '5px', boxSizing: 'border-box' }}
+            style={{ width: '100%', padding: '8px', marginTop: '5px', boxSizing: 'border-box' }}
           />
         </div>
         <div style={{ marginBottom: '10px' }}>
@@ -97,7 +123,7 @@ function SignUp() {
             onChange={handleChange}
             minLength={5}
             required 
-            style={{ width: '100%', padding: '8px', marginTop: '5px', boxSizing: 'border-box' }} style={{ width: '100%', padding: '8px', marginTop: '5px', boxSizing: 'border-box' }}
+            style={{ width: '100%', padding: '8px', marginTop: '5px', boxSizing: 'border-box' }}
           />
         </div>
         <div style={{ marginBottom: '10px' }}>
