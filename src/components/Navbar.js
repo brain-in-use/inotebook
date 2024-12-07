@@ -71,7 +71,7 @@ const handelSignOut=()=>{
               Mode
             </label>
           </div>
-          {!localStorage.getItem('token')?<div>
+          {!localStorage.getItem('token')?<>
           <Link className={`nav-link`} to="/login">
             <button type="button" className="btn btn-secondary mx-2">
               Login
@@ -83,7 +83,7 @@ const handelSignOut=()=>{
               SignUp
             </button>
           </Link>
-          </div>:
+          </>:
           <button type="button" className="btn btn-secondary mx-2" onClick={handelSignOut}>
             SignOut
           </button>
